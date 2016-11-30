@@ -41,7 +41,7 @@ public class ShooterSubsystem extends Subsystem {
 	}
 	public void servoUp()
 	{
-		setServoAngle(115);
+		setServoAngle(98);
 	}
 	//The code here is only for the setting of shooter wheel speed
 	public void powerShooterL(double power)

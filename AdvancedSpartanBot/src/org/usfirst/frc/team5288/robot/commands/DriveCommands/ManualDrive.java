@@ -7,6 +7,7 @@ import org.usfirst.frc.team5288.robot.Robot;
  */
 public class ManualDrive extends Command {
 	final double SafeZone = 0.15;
+	public double throttle = 1;
     public ManualDrive() {
         // Use requires() here to declare subsystem dependencies
         // eg. requires();
@@ -16,7 +17,7 @@ public class ManualDrive extends Command {
     // Called just before this Command runs the first time
     protected void initialize() {
     Robot.DrivetrainSubsystem.setPowerLeft(0);// Stops the robot immediately
-    Robot.DrivetrainSubsystem.setPowerLeft(0);//Stops
+    Robot.DrivetrainSubsystem.setPowerRight(0);//Stops
     }
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
@@ -45,7 +46,7 @@ public class ManualDrive extends Command {
     		//Left Side 
     		if(Robot.oi.getLeftStickX() <= SafeZone || Robot.oi.getLeftStickX() >= -SafeZone)//checks if the joystick is in safezone
     		{
-    			Robot.DrivetrainSubsystem.setPowerLeft(Robot.DrivetrainSubsystem.throttle*Robot.oi.getLeftStickY());
+    			Robot.DrivetrainSubsystem.setPowerLeft(throttle*(-Robot.oi.getLeftStickY()));
     		}
     		else// if the joystick Y value is in the safezone, sets the robot's left motor to 0 output
     		{
@@ -55,7 +56,7 @@ public class ManualDrive extends Command {
     		if(Robot.oi.getRightStickY() >= SafeZone || Robot.oi.getRightStickY() <= (-1)*SafeZone)//checks if the joystick is in safezone
     		{
     			//sets the robots' right speed through a method declared in the drive subystem
-    			Robot.DrivetrainSubsystem.setPowerRight(Robot.DrivetrainSubsystem.throttle*Robot.oi.getRightStickY());
+    			Robot.DrivetrainSubsystem.setPowerRight(throttle*(-Robot.oi.getRightStickY()));
     		}
     		else
     		{

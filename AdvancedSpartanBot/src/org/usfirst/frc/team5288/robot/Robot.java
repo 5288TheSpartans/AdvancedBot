@@ -1,17 +1,22 @@
 
 package org.usfirst.frc.team5288.robot;
 
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
+import org.usfirst.frc.team5288.robot.commands.*;
 import org.usfirst.frc.team5288.robot.commands.DriveCommands.DriveToPosition;
 import org.usfirst.frc.team5288.robot.commands.ShooterCommands.ShootBall;
 import org.usfirst.frc.team5288.robot.subsystems.*;
+import org.usfirst.frc.team5288.robot.commands.AutoGroups.*;
+import com.ni.vision.NIVision;
+import com.ni.vision.NIVision.Image;
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the IterativeRobot
@@ -20,42 +25,58 @@ import org.usfirst.frc.team5288.robot.subsystems.*;
  * directory.
  */
 public class Robot extends IterativeRobot {
+	public static double ftps = 0;
+	public static double Lftps = 0;
+	public static double Rftps = 0;
 	public static DrivetrainSubsystem DrivetrainSubsystem; 
 	public static ShooterSubsystem ShooterSubsystem;
 	public static ShooterY ShooterY;
+	private static double frameCounter = 0;
  	public static double matchTime = 0;
-	Command manualDrive;
+	int session;
+	Image frame;
     Command autonomousCommand;
-    Command lowBarDoubleBallAuto;
-    Command portcullisDoubleBallAuto;
-    Command DoubleBallAuto;
-    Command ManualShooterUp;
-    Command ManualShooterDown;
-    SendableChooser chooser;
+;
+    SendableChooser autoChooser;
 	public static OI oi;
+	private static double distanceMemes = 0;
 
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
      */
 	public void robotInit() {
+
+//CAMERA
+		frame = NIVision.imaqCreateImage(NIVision.ImageType.IMAGE_RGB, 0);
+
+		// the camera name (ex "cam0") can be found through the roborio web interface
+		session = NIVision.IMAQdxOpenCamera("cam1",
+				NIVision.IMAQdxCameraControlMode.CameraControlModeController);
+		NIVision.IMAQdxConfigureGrab(session); 
+  	  NIVision.IMAQdxStartAcquisition(session);
+
+//CAMERA
     	DrivetrainSubsystem = new DrivetrainSubsystem(); 
     	ShooterSubsystem = new ShooterSubsystem();
     	ShooterY = new ShooterY();
     	oi = new OI();
-        chooser = new SendableChooser();
-        chooser.addDefault("Default Auto", new ShootBall());
-        chooser.addObject("Shoot Ball", new ShootBall());
+       autoChooser = new SendableChooser();
+        autoChooser.addDefault("Shoot Ball", new ShootBallAuto());
+        autoChooser.addObject("DriveBoth", null);
+      //  autoChooser.addObject("DriveBoth", new DriveBothAdd());
         //Creates all of the smartdashboard widgets and displays all variables
-        SmartDashboard.putData("Auto mode", chooser);
+        SmartDashboard.putData("Auto mode", autoChooser);
         SmartDashboard.putNumber("Left Drive Speed",DrivetrainSubsystem.getLeftDrive());
         SmartDashboard.putNumber("Right Drive Speed",DrivetrainSubsystem.getRightDrive());
         SmartDashboard.putNumber("Match Time", DriverStation.getInstance().getMatchTime());//creates matchtime widget
         SmartDashboard.putNumber("Throttle",DrivetrainSubsystem.throttle);
-        SmartDashboard.putNumber("Left Encoder ", DrivetrainSubsystem.leftEncTicks());
+        SmartDashboard.putNumber("Total Rotation",DrivetrainSubsystem.getGyroAngle());
+
+        SmartDashboard.putNumber("Left Encoder Memes", DrivetrainSubsystem.leftEncTicks());
         SmartDashboard.putNumber("Right Encoder Memes", DrivetrainSubsystem.rightEncTicks());
         SmartDashboard.putNumber("Feet/s", 0);
-
+        SmartDashboard.putNumber("Auto Distance",12);
         //SmartDashboard.
     }
 	
@@ -69,6 +90,18 @@ public class Robot extends IterativeRobot {
     }
 	
 	public void disabledPeriodic() {
+        SmartDashboard.putData("Auto mode", autoChooser);
+        SmartDashboard.putNumber("Left Drive Speed",DrivetrainSubsystem.getLeftDrive());
+        SmartDashboard.putNumber("Right Drive Speed",DrivetrainSubsystem.getRightDrive());
+        SmartDashboard.putNumber("Match Time", DriverStation.getInstance().getMatchTime());//creates matchtime widget
+        SmartDashboard.putNumber("Throttle",DrivetrainSubsystem.throttle);
+        SmartDashboard.putNumber("Total Rotation",DrivetrainSubsystem.getGyroAngle());
+      	Lftps = 0;
+    	Rftps = 0;
+        SmartDashboard.putNumber("Left Encoder Memes", DrivetrainSubsystem.leftEncTicks());
+        SmartDashboard.putNumber("Right Encoder Memes", DrivetrainSubsystem.rightEncTicks());
+        SmartDashboard.putNumber("Feet/s", 0);
+        SmartDashboard.putNumber("Auto Distance",12);
 		Scheduler.getInstance().run();	}
 
 	/**
@@ -81,20 +114,11 @@ public class Robot extends IterativeRobot {
 	 * or additional comparisons to the switch structure below with additional strings & commands.
 	 */
     public void autonomousInit() {
-        
-		 String autoSelected = SmartDashboard.getString("Auto Selector", "Default");
-		switch(autoSelected) {
-		case "My Auto":
-			autonomousCommand = new DriveToPosition();
-			break;
-		case "Default Auto":
-		default:
-			autonomousCommand = new ShootBall();
-			break;
-		} 
-    	
-    	// schedule the autonomous command (example)
-        if (autonomousCommand != null) autonomousCommand.start();
+    	distanceMemes = SmartDashboard.getNumber("Auto Distance");
+		 //String autoSelected = SmartDashboard.getString("Auto Selector", "Default");
+    //	autonomousCommand = (Command) autoChooser.getSelected();
+      autonomousCommand = new ShootBallAuto();
+    	if (autonomousCommand != null) autonomousCommand.start();
     }
 
     /**
@@ -109,29 +133,56 @@ public class Robot extends IterativeRobot {
         // teleop starts running. If you want the autonomous to 
         // continue until interrupted by another command, remove
         // this line or comment it out.
-        //if (autonomousCommand != null) autonomousCommand.cancel();
+        // (autonomousCommand != null) autonomousCommand.cancel();
     }
 
     /**
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
+    	frameCounter++;
+    	if(frameCounter >=2){
+    	updateCamera();
+    	frameCounter = 0;
+    	}
     	Scheduler.getInstance().run();
-    	SmartDashboard.putData("Auto mode", chooser);
+    	SmartDashboard.putData("Auto mode", autoChooser);
         SmartDashboard.putNumber("Left Drive Speed",DrivetrainSubsystem.getLeftDrive());
         SmartDashboard.putNumber("Right Drive Speed",DrivetrainSubsystem.getRightDrive());
         SmartDashboard.putNumber("Match Time", DriverStation.getInstance().getMatchTime());//creates matchtime widget
         SmartDashboard.putNumber("Throttle",DrivetrainSubsystem.throttle);
         SmartDashboard.putNumber("Left Encoder Memes", DrivetrainSubsystem.leftEncTicks());
         SmartDashboard.putNumber("Right Encoder Memes", DrivetrainSubsystem.rightEncTicks());
-        Robot.DrivetrainSubsystem.updateSpeed(); 
+        SmartDashboard.putNumber("Total Rotation",DrivetrainSubsystem.getGyroAngle());
+        //Robot.DrivetrainSubsystem.updateSpeed(); 
     }
-    
+    public void updateCamera()
+    {
+
+
+          /**
+           * grab an image, draw the circle, and provide it for the camera server
+           * which will in turn send it to the dashboard.
+           */
+          NIVision.Rect rect = new NIVision.Rect(10, 10, 100, 100);
+              NIVision.IMAQdxGrab(session, frame, 1);
+              CameraServer.getInstance().setImage(frame);
+
+              /** robot code here! **/
+         // NIVision.IMAQdxStopAcquisition(session);
+          
+
+    }
     /**
      * This function is called periodically during test mode
      */
     public void testPeriodic() {
- 
         LiveWindow.run();
+    }
+    public static void setDistance(int distance){
+    	distanceMemes = distance;
+    }
+    public static double getDistance(){
+    	return distanceMemes;
     }
 }

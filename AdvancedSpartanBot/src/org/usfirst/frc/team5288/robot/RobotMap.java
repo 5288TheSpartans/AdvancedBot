@@ -11,10 +11,10 @@ public class RobotMap {
     // public static int leftMotor1 = 1;
     // public static int rightMotor = 2;
 	//Drivetrain Subsystem
-    public static int rightMotor1 = 3 ;
-    public static int rightMotor2 = 2 ;
-    public static int leftMotor1 = 0 ;
-    public static int leftMotor2 = 1 ;
+    public static int rightMotor1 = 3;
+    public static int rightMotor2 = 2;
+    public static int leftMotor1 = 0;
+    public static int leftMotor2 = 1;
     //DI/O
     public static int leftEnc1 = 0;
     public static int leftEnc2 = 1;
@@ -28,7 +28,9 @@ public class RobotMap {
     //DI/O
     public static int shooterUpperLimit = 4;//Limit switches
     public static int shooterLowerLimit = 5;//Limit switches
-    //
+    //XBOX CONTROLLER MAPPINGS
+    public static int xboxJLX = 0, xboxJLY = 1, xboxLTrig = 2, xboxRTrig = 3, xboxJRX = 4, xboxJRY = 5;
+    
     // If you are using multiple modules, make sure to define both the port
     // number and the module. For example you with a rangefinder:
     // public static int rangefinderPort = 1;

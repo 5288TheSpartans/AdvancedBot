@@ -10,7 +10,6 @@ import org.usfirst.frc.team5288.robot.commands.ShooterArmCommands.ManualShooterU
 import org.usfirst.frc.team5288.robot.commands.ShooterCommands.IntakeBall;
 import org.usfirst.frc.team5288.robot.commands.ShooterCommands.PrepareBall;
 import org.usfirst.frc.team5288.robot.commands.ShooterCommands.ShootBall;
-
 /**
  * This class is the glue that binds the controls on the physical operator
  * interface to the commands and command groups that allow control of the robot.
@@ -24,6 +23,8 @@ public class OI {
     // Button button = new JoystickButton(stick, buttonNumber);
     Joystick joystickLeft = new Joystick(0);    //left joystick is in port 1
     Joystick joystickRight = new Joystick(1);    //right joystick is in port 0
+    Joystick xbox = new Joystick(2);
+    
  	public JoystickButton btnL1 = new JoystickButton(joystickLeft,1),
  					btnL2= new JoystickButton(joystickLeft,2),
 					btnL3 = new JoystickButton(joystickLeft,3),
@@ -41,7 +42,20 @@ public class OI {
 				btnR6 = new JoystickButton(joystickRight,6),
 				btnR7 = new JoystickButton(joystickRight,7),
 				btnR8 = new JoystickButton(joystickRight,8),
-				btnR9 = new JoystickButton(joystickRight,9);
+				btnR9 = new JoystickButton(joystickRight,9),
+ 				btnR10 = new JoystickButton(joystickRight,10),
+ 		 		btnR11 = new JoystickButton(joystickRight,1); 
+ 	public JoystickButton btnx1 = new JoystickButton(xbox,2),
+			btnx2 = new JoystickButton(xbox,3),
+			btnx3 = new JoystickButton(xbox,4),
+			btnx4 = new JoystickButton(xbox,5),
+			btnx5 = new JoystickButton(xbox,6),
+			btnx6 = new JoystickButton(xbox,7),
+			btnx7 = new JoystickButton(xbox,8),
+			btnx8 = new JoystickButton(xbox,9),
+			btnx9= new JoystickButton(xbox,10);
+			
+		 	
 
     public OI()
     {    	
@@ -72,13 +86,31 @@ public class OI {
     btnR1.whileHeld(new PrepareBall());
     btnR2.whileHeld(new ShootBall());
     btnR9.whileHeld(new DriveStraight());
+    btnx1.whileHeld(new AimToShoot());
     
   // btnR3.whenPressed
     //-----------------------------Code for returning Joystick Axis--------------------------
     
     }
+    public double getXLY()
+    {
+    	return (-xbox.getRawAxis(1));
+    }
+    public double getXLX()
+    {
+    	return (xbox.getRawAxis(0));
+    }
+    public double getXRY()
+    {
+    	return (-xbox.getRawAxis(5));
+    }
+    public double getXRX()
+    {
+    	return (xbox.getRawAxis(4));
+    }
     public double getLeftStickY()
     {
+     
     	return(joystickLeft.getY());//Returns the chosen axis specified by code.
     }
     public double getLeftStickX()

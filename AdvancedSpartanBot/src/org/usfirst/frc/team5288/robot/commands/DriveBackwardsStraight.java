@@ -1,4 +1,4 @@
-package org.usfirst.frc.team5288.robot.commands.DriveCommands;
+package org.usfirst.frc.team5288.robot.commands;
 
 import edu.wpi.first.wpilibj.command.Command;
 
@@ -7,16 +7,15 @@ import edu.wpi.first.wpilibj.DriverStation;
 /**
  *
  */
-public class DriveToPosition extends Command {
+public class DriveBackwardsStraight extends Command {
 	public double leftDistance = 0;
     public double rightDistance = 0;
-    public double startingEncDistance = 0;
     public double avgDistance = 0;
-    public final double speed = 0.8;
+    public final double speed = 0.4;
     public final double gain = 0.1;
     public double autoDistance;
     double error;
-    public DriveToPosition(int autoDistance, boolean isAuto) {
+    public DriveBackwardsStraight() {
         // Use requires() here to declare subsystem dependencies
     	requires(Robot.DrivetrainSubsystem);
     }
@@ -42,8 +41,8 @@ public class DriveToPosition extends Command {
     	{
     		error = -0.3;
     	}
-    	Robot.DrivetrainSubsystem.setPowerLeft(speed+ error);
-    	Robot.DrivetrainSubsystem.setPowerRight(speed - error);
+    	Robot.DrivetrainSubsystem.setPowerLeft(-speed - error);
+    	Robot.DrivetrainSubsystem.setPowerRight(-speed + error);
     }
 
     // Make this return true when this Command no longer needs to run execute()
